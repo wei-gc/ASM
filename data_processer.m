@@ -23,6 +23,10 @@ save('DATA/Example_FindFace_landmarks_MUCT','allLandmarks')
 
 
 fid = fopen('DATA/face_file_names.txt', 'a+');
+new_folder = fullfile(project_dir, 'DATA', 'valid_faces');
 for i=1:size(allLandmarks, 2)
     fprintf(fid, '%s\n', faceFiles(i).name);
+    full_file_name = fullfile(pathToImages, faceFiles(i).name);
+
+%     copyfile(full_file_name, new_folder)
 end

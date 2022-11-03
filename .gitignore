@@ -1,2 +1,5 @@
 full_data/*
-data_loader.ipynb
+visualization.ipynb
+DATA/faces/*
+DATA/muct_landmarks
+__pycache__
