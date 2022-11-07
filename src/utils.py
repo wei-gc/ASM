@@ -1,6 +1,6 @@
 import numpy as np
 
-def generalized_proc(shape_mean, shape_x, w):
+def generalized_proc(shape_mean, shape_x, w=None):
     ''' compute translation and rotation matrix 
     The problem can be convert to a 4-order linear system: 
         mat * (a_x, a_y, t_x, t_y).T = arr
@@ -12,8 +12,8 @@ def generalized_proc(shape_mean, shape_x, w):
                 (N_points,)
                 if w is None, then it's default value is 1
     '''
-    # if w == None:
-    #     w = np.ones(shape_x.shape[0])
+    if w is None:
+        w = np.ones(shape_x.shape[0])
     assert shape_mean.shape == shape_x.shape
 
     # X_i = \sum_k w_k * x_ik
