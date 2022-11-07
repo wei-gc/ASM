@@ -11,7 +11,7 @@ class Shape_Model:
     def __init__(self, unaligned_shapes, ali_method='proc') -> None:
         self.ali_method = ali_method
         self.unaligned_shapes = unaligned_shapes
-        self.aligned_shapes = self.align(unaligned_shapes)
+        self.aligned_shapes = self.align(unaligned_shapes, self.ali_method)
         self.x_mean = np.mean(self.aligned_shapes, axis=1)
         self.n_shapes = unaligned_shapes.shape[1]
         
@@ -24,18 +24,20 @@ class Shape_Model:
         # shape_mean = np.hstack(shape_mean_raw[::2, None], shape_mean_raw[1::2, None])
         shape_mean = shape_mean_raw.reshape(-1, 2)
 
+        if ali_method == 'modified_proc':
+            dis = np.linalg.norm(shape_mean[:,None,:] - shape_mean[None, :, :], axis=-1)
+            w = np.var(dis, axis=0)
+            shape_mean = unaligned_shapes[:,0].reshape(-1, 2)
+        elif ali_method == 'proc':
+            w = np.ones(shape_mean.shape[0])
+        else:
+            raise
+
         aligned_shape = np.zeros_like(unaligned_shapes)
         for i in range(n_shapes):
             shape_i = unaligned_shapes[:, i].reshape(-1, 2)
 
-            if ali_method == 'proc':
-                _, _, shape_i_aligned = utils.generalized_proc(shape_mean, shape_i)
-            elif ali_method == 'maha':
-                raise ValueError("maha metric Not implemented")
-                shape_i_aligned = utils.generalized_proc(shape_mean, shape_i)
-            else:
-                raise
-
+            _, _, shape_i_aligned = utils.generalized_proc(shape_mean, shape_i, w)
             aligned_shape[:, i] = shape_i_aligned.flatten()
         
         return aligned_shape
