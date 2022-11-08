@@ -18,15 +18,18 @@ class Shape_Model:
         self.eig_val, self.eig_vec = self.pca(self.aligned_shapes)
 
 
-    def align(self, unaligned_shapes, ali_method='proc'):
+    def align(self, unaligned_shapes, ali_method='proc', return_w=False):
         n_shapes = unaligned_shapes.shape[1]
         shape_mean_raw = np.mean(unaligned_shapes, axis=1)
         # shape_mean = np.hstack(shape_mean_raw[::2, None], shape_mean_raw[1::2, None])
         shape_mean = shape_mean_raw.reshape(-1, 2)
 
         if ali_method == 'modified_proc':
-            dis = np.linalg.norm(shape_mean[:,None,:] - shape_mean[None, :, :], axis=-1)
-            w = np.var(dis, axis=0)
+            raw_shapes = unaligned_shapes.reshape(-1, 2, n_shapes)
+            dis = np.linalg.norm(raw_shapes[:,None,:,:] - raw_shapes[None, :, :, :], axis=-2)
+            w = np.var(dis, axis=-1)
+            w = np.sum(w, axis=1)
+            w = 1 / w
             shape_mean = unaligned_shapes[:,0].reshape(-1, 2)
         elif ali_method == 'proc':
             w = np.ones(shape_mean.shape[0])
@@ -40,7 +43,10 @@ class Shape_Model:
             _, _, shape_i_aligned = utils.generalized_proc(shape_mean, shape_i, w)
             aligned_shape[:, i] = shape_i_aligned.flatten()
         
-        return aligned_shape
+        if return_w:
+            return aligned_shape, w
+        else:
+            return aligned_shape
 
     def cut_b(self, b):
         n = b.shape[0]
